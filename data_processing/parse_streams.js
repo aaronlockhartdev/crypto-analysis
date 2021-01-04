@@ -2,12 +2,6 @@ const config = require ('../config');
 const MongoClient = require('mongodb').MongoClient;
 const WebSocketClient = require('websocket').client;
 
-async function initDB() {
-    // for each collection, implement TTL
-    for (p of config.products) {
-        await db.collection(p.toLowerCase()).createIndex( { "trade_date": 1 }, { expireAfterSeconds: config.trade_ttl } )
-    }
-}
 
 async function parseStream(uri, sub, proc) {
     const mongoClient = new MongoClient(config.mongo_uri, { useNewUrlParser: true, useUnifiedTopology: true });

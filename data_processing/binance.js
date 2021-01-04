@@ -9,6 +9,19 @@ async function processBinance() {
     await mongoClient.connect();
     const db = mongoClient.db('trades');
 
+    // for each collection, implement TTL
+    for (p of config.products) {
+        await db.collection(p.toLowerCase()).createIndex( { "time": 1 }, { expireAfterSeconds: config.trade_ttl } )
+    }
+
+    let streams = [];
+    for (m of config.markets.binance) {
+        streams.push(m.toLowerCase() + '@aggTrade');
+    }
+    let getArgs = 'streams=';
+    getArgs += streams.join('/');
+    let binanceURI = 'wss://stream.binance.com:9443/stream?' + getArgs
+
     // catch failed connection
     webSocketClient.on('connectFailed', function(error) {
         console.log('Connect Error: ' + error.toString());
@@ -22,7 +35,9 @@ async function processBinance() {
         });
         // catch close
         connection.on('close', function() {
-            console.log('Connection Closed');
+            console.log('Connection Closed, retrying');
+            // retry connection (connection automatically closed after 24h)
+            webSocketClient.connect(binanceURI);
         });
         // catch message
         connection.on('message', function(message) {
@@ -38,15 +53,9 @@ async function processBinance() {
             }
         });
     });
-    let streams = []
-    for (m of config.markets.binance) {
-        streams.push(m.toLowerCase() + '@aggTrade');
-    }
-    let getArgs = 'streams='
-    for (s of streams) getArgs += (s + '/');
-    getArgs = getArgs.slice(0, -1);
+    
     // connect to websocket
-    webSocketClient.connect('wss://stream.binance.com:9443/stream?' + getArgs);
+    webSocketClient.connect(binanceURI);
 }
 
 if (require.main === module) {

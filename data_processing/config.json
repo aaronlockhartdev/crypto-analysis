@@ -1,5 +1,6 @@
 {
     "mongo_uri": "mongodb://10.0.20.86:27017",
+    "trade_ttl": 3600,
     "markets": {
         "binance": [
             "ETHBUSD",
