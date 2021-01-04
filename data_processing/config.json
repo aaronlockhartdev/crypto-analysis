@@ -1,0 +1,12 @@
+{
+    "mongo_uri": "mongodb://10.0.20.86:27017",
+    "markets": {
+        "binance": [
+            "ETHBUSD",
+            "BTCBUSD"
+        ],
+        "coinbase": [
+            "BTC-USD"
+        ]
+    }
+}
